@@ -97,8 +97,7 @@ public class BloomJoin {
 		System.out.println(myFilter.filterSize());
 		System.out.println(myFilter.numHashes());
 		System.out.println(myFilter.dataSize());
-		System.out.println(myFilter.cardinality());
-		System.out.println(myFilter.length());
+		
 		//System.out.println(toJoin.get(0).getLeft() + " " + toJoin.get(0).getRight());
 		//System.out.println(toJoin.size());
 	}
