@@ -121,8 +121,8 @@ public class BloomFilterRan {
 				hash += this.filterSize;
 			}
 	
-			//if the hash returns a 0, the item is not in the set
-			if (currentCheck = filter.get(hash)){
+			//if current check is false item is not in the set
+			if (filter.get(hash) == false){
 				check = false;
 				break;
 			}
@@ -141,5 +141,10 @@ public class BloomFilterRan {
 	public int numHashes(){
 		return this.numHash;
 	}
-	
+	public int cardinality(){
+		return this.filter.cardinality();
+	}
+	public int length(){
+		return this.filter.length();
+	}
 }

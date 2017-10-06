@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class FilterTests {
 	public static void main(String[] args) throws IOException{
-		/*BloomFilterRan myFilter = new BloomFilterRan(4,10);
+		BloomFilterRan myFilter = new BloomFilterRan(4,10);
 		myFilter.add("map");
 		myFilter.add("table");
 		myFilter.add("browns");
@@ -16,7 +16,7 @@ public class FilterTests {
 		System.out.println(myFilter.appears("test"));
 		System.out.println(myFilter.filterSize());
 		System.out.println(myFilter.dataSize());
-		System.out.println(myFilter.numHashes());*/
+		System.out.println(myFilter.numHashes());
 		
 		/*BloomFilterFNV myFilterFNV = new BloomFilterFNV(32,2);
 		myFilterFNV.add("map");
@@ -61,9 +61,9 @@ public class FilterTests {
 		System.out.println(myDynamicFilter.dataSize());
 		System.out.println(myDynamicFilter.numHashes());*/
 		
-		BloomJoin bloomJ = new BloomJoin("C:\\Users\\Sam\\workspace\\cs435project1\\src\\cs435project1\\Relation1.txt",
+		/*BloomJoin bloomJ = new BloomJoin("C:\\Users\\Sam\\workspace\\cs435project1\\src\\cs435project1\\Relation1.txt",
 				"C:\\Users\\Sam\\workspace\\cs435project1\\src\\cs435project1\\Relation2.txt");
 		
-		bloomJ.join("test");
+		bloomJ.join("test");*/
 	}
 }
