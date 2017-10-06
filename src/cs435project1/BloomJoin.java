@@ -81,25 +81,42 @@ public class BloomJoin {
 		
 	}
 	
-	void join(String r3){
-		BloomFilterRan myFilter = new BloomFilterRan(count1, 16);
+	void join(String r3) throws FileNotFoundException, UnsupportedEncodingException{
+		BloomFilterRan myFilter = new BloomFilterRan(count1, 32);
 		List<Pair> toJoin = new ArrayList<Pair>();
 		for(int i = 0; i < count1; i++){
 			myFilter.add(relation1[i].getLeft());
 		}
 		
-		/*for(int i = 0; i < count2; i++){
+		for(int i = 0; i < count2; i++){
 			if(myFilter.appears(relation2[i].getLeft())){
 				toJoin.add(relation2[i]);
 			}
-		}*/
+		}
 		
 		System.out.println(myFilter.filterSize());
 		System.out.println(myFilter.numHashes());
 		System.out.println(myFilter.dataSize());
+
+		System.out.println(toJoin.size());
 		
-		//System.out.println(toJoin.get(0).getLeft() + " " + toJoin.get(0).getRight());
-		//System.out.println(toJoin.size());
+		List<String[]> relation3 = new ArrayList<String[]>();
+		for(int i = 0; i < toJoin.size(); i++){
+			for(int j = 0; j < count1; j++){
+				if(toJoin.get(i).getLeft().equals(relation1[j].getLeft())){
+					System.out.println("Here");
+					String[] s = {toJoin.get(i).getLeft(),relation1[j].getRight(),toJoin.get(i).getRight()};
+					relation3.add(s);
+				}
+			}
+		}
+		
+		PrintWriter writer = new PrintWriter(r3, "UTF-8");
+		for(int i = 0; i < relation3.size(); i++){
+			writer.println(relation3.get(i)[0] + "\t" + relation3.get(i)[1] + "\t" + relation3.get(i)[2]);
+		}
+		writer.close();
+		
 	}
 	
 }

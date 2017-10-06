@@ -4,6 +4,7 @@ import java.util.BitSet;
 import java.util.Random;
 import java.util.List;
 import java.util.ArrayList;
+import java.math.BigInteger;
 
 public class DynamicFilter {
 	List<BitSet> filterArray = new ArrayList<BitSet>();
@@ -73,35 +74,32 @@ public class DynamicFilter {
 	}
 	
 	private int performFunction(String s, int hashIndex, int filterIndex){
-		int hash = 0;
-		for (int i = 0; i < s.length(); i++){
-			hash += (this.functionArray.get(filterIndex)[hashIndex][1]*s.charAt(i)
-						+ this.functionArray.get(filterIndex)[hashIndex][2])
-						% this.functionArray.get(filterIndex)[hashIndex][0];
-		}
-		return hash;
+		BigInteger hash = BigInteger.valueOf(0);
+		BigInteger a = BigInteger.valueOf(this.functionArray.get(filterIndex)[hashIndex][1]);
+		BigInteger b = BigInteger.valueOf(this.functionArray.get(filterIndex)[hashIndex][2]);
+		BigInteger p = BigInteger.valueOf(this.functionArray.get(filterIndex)[hashIndex][0]);
+		//loops through each char
+		a = a.multiply(BigInteger.valueOf(s.hashCode()));
+		a = a.add(b);
+		a = a.mod(p);
+		hash = hash.add(a);
+		hash = hash.mod(BigInteger.valueOf(this.filterSizeArray.get(filterIndex)));
+		return hash.intValue();
 	}
 	
 	void add(String s){
 		s = s.toLowerCase();
-		boolean newElement = false;
-		if (appears(s) == false){
-			newElement = true;
-		}
-		if(newElement){
+		if(appears(s) == false){
 			int hash;
 			for(int i = 0; i < this.numHashArray.get(this.currentFilter); i++){
 				hash = performFunction(s, i, this.currentFilter);
-				hash = hash % currentMaxSize;
-				if (hash < 0){
-					hash += currentMaxSize;
-				}
 				this.filterArray.get(currentFilter).set(hash);	
 			}
 			this.elementsAdded++;
 			if (this.elementsAdded == this.currentMaxSize){
 				addFilter();
 			}
+			//System.out.println(filterArray.get(currentFilter).toString());
 		}
 	}
 	
@@ -114,10 +112,6 @@ public class DynamicFilter {
 			for (int j = 0; j < this.numHashArray.get(i); j++){
 				boolean hashCheck = false;
 				hash = performFunction(s, j, i);
-				hash = hash % this.maxSizeArray.get(i);
-				if (hash < 0){
-					hash += this.maxSizeArray.get(i);
-				}
 				hashCheck = this.filterArray.get(i).get(hash);
 				if (hashCheck == false){
 					filterCheck = false;

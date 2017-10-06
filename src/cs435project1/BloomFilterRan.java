@@ -2,18 +2,19 @@ package cs435project1;
 
 import java.util.BitSet;
 import java.util.Random;
+import java.math.BigInteger;
 
 public class BloomFilterRan {
-	int maxSize;
-	int bits;
-	BitSet filter;
-	int numHash;
-	int filterSize;
-	int[][] functionArr;
-	int elementsAdded;
+	private int maxSize;
+	private int bits;
+	private BitSet filter;
+	private int numHash;
+	private int filterSize;
+	private int[][] functionArr;
+	private int elementsAdded;
 
 	
-	BloomFilterRan(int setSize, int bitsPerElement){
+	public BloomFilterRan(int setSize, int bitsPerElement){
 		maxSize = setSize;
 		bits = bitsPerElement;
 		filterSize = maxSize * bits;
@@ -22,11 +23,11 @@ public class BloomFilterRan {
 		functionArr = new int[numHash][];
 		for (int i = 0; i < numHash; i++){
 			functionArr[i] = getHash();
-			//System.out.println(functionArr[i][0] + " " + functionArr[i][1] + " " + functionArr[i][2]);
 		}
 		elementsAdded = 0;
 	}
 	
+	//gets next prime
 	private int getNextPrime(int n){
 		boolean primeFound = false;
 		int nextPrime = 0;
@@ -73,24 +74,25 @@ public class BloomFilterRan {
 		//if not already in the hash
 		if(appears(s) == false){
 			//creates hash value
-			int hash;
+			BigInteger hash;
+			BigInteger a;
+			BigInteger b;
+			BigInteger p;
 			//loops through each hash
 			for(int i = 0; i < numHash; i++){
 				//sets hash to 0
-				hash = 0;
-				//loops through each char
-				for (int j = 0; j < s.length(); j++){
-					//performs (a*charat(j) + b) % prime and adds it to the hash
-					hash += (this.functionArr[i][1]*s.charAt(j) + this.functionArr[i][2]) % this.functionArr[i][0];
-				}
+				hash = BigInteger.valueOf(0);
+				a = BigInteger.valueOf(this.functionArr[i][1]);
+				b = BigInteger.valueOf(this.functionArr[i][2]);
+				p = BigInteger.valueOf(this.functionArr[i][0]);
+				a = a.multiply(BigInteger.valueOf(s.hashCode()));
+				a = a.add(b);
+				a = a.mod(p);
+				hash = hash.add(a);
 				//modulo filter size so it fits
-				hash = hash % filterSize;
-				//if hash is negative make it positive
-				if (hash < 0){
-					hash += this.filterSize;
-				}
+				hash = hash.mod(BigInteger.valueOf(filterSize));
 				//set hash
-				filter.set((int) hash);
+				filter.set(hash.intValue());
 				
 			}
 			//increment elements added
@@ -103,26 +105,25 @@ public class BloomFilterRan {
 		s = s.toLowerCase();
 		//assume true
 		boolean check = true;
-		int hash;
-		//loop through each hash function
+		BigInteger hash;
+		BigInteger a;
+		BigInteger b;
+		BigInteger p;
+		//loops through each hash
 		for(int i = 0; i < numHash; i++){
-			//reset hash
-			hash = 0;
-			//assume particular check is false
-			boolean currentCheck = false;
-			//performs (a*charat(j) + b) % prime and adds it to the hash
-			for (int j = 0; j < s.length(); j++){
-				hash += (this.functionArr[i][1]*s.charAt(j) + this.functionArr[i][2]) % this.functionArr[i][0];
-			}
-			//modulo filter size so it fits
-			hash = hash % filterSize;
-			//if hash is negative make it positive
-			if (hash < 0){
-				hash += this.filterSize;
-			}
-	
+			//sets hash to 0
+			hash = BigInteger.valueOf(0);
+			a = BigInteger.valueOf(this.functionArr[i][1]);
+			b = BigInteger.valueOf(this.functionArr[i][2]);
+			p = BigInteger.valueOf(this.functionArr[i][0]);
+			//loops through each char
+			a = a.multiply(BigInteger.valueOf(s.hashCode()));
+			a = a.add(b);
+			a = a.mod(p);
+			hash = hash.add(a);
+			hash = hash.mod(BigInteger.valueOf(filterSize));
 			//if current check is false item is not in the set
-			if (filter.get(hash) == false){
+			if (filter.get(hash.intValue()) == false){
 				check = false;
 				break;
 			}
@@ -140,11 +141,5 @@ public class BloomFilterRan {
 	
 	public int numHashes(){
 		return this.numHash;
-	}
-	public int cardinality(){
-		return this.filter.cardinality();
-	}
-	public int length(){
-		return this.filter.length();
 	}
 }

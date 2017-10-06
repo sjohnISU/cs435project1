@@ -1,83 +1,63 @@
 package cs435project1;
 
 import java.util.BitSet;
+import java.math.BigInteger;
 
 public class BloomFilterMurmur {
-	int maxSize;
-	int bits;
-	BitSet filter;
-	int numHash;
-	int filterSize;
-	int elementsAdded;
+	private int maxSize;
+	private int bits;
+	private BitSet filter;
+	private int numHash;
+	private int filterSize;
+	private int elementsAdded;
 	
-	BloomFilterMurmur(int setSize, int bitsPerElement){
+	public BloomFilterMurmur(int setSize, int bitsPerElement){
 		maxSize = setSize;
 		bits = bitsPerElement;
 		filterSize = maxSize * bits;
 		filter = new BitSet(maxSize * bits);
-		numHash = 2*filterSize/maxSize;
+		numHash = (int) Math.ceil(Math.log(2) * (filterSize/maxSize));
 		elementsAdded = 0;
 	}
 	
 	void add(String s){
+		//stores upper and lowercase value of S
 		String capS = s.toUpperCase();
 		String lowS = s.toLowerCase();
-		boolean new_element = false;
-		for (int i = 0; i < numHash; i++){
-			long hash = 0;
-			long capSHash = MurmurHash.hash64(capS);
-			long lowSHash = MurmurHash.hash64(lowS);
-			hash = (capSHash + i * lowSHash) % this.maxSize;
-			if (hash < 0){
-				hash += this.maxSize;
+		
+		if(appears(s) == false){
+			for (int i = 0; i < numHash; i++){
+				//creates hash by taking hash(UPPERCASE) + hash(LOWERCASE) * i % size of the bloom filter
+				//as explained here: http://willwhim.wpengine.com/2011/09/03/producing-n-hash-functions-by-hashing-only-once/
+				BigInteger hash;
+				BigInteger capSHash = BigInteger.valueOf(MurmurHash.hash64(capS));
+				BigInteger lowSHash = BigInteger.valueOf(MurmurHash.hash64(lowS));
+				hash = capSHash.add(lowSHash.multiply(BigInteger.valueOf(i)));
+				hash = hash.mod(BigInteger.valueOf(this.filterSize));	
+				//sets hash value
+				filter.set(hash.intValue());
 			}
-			
-			BitSet currentState = filter.get((int)hash*this.bits, (int)hash*this.bits + this.bits);
-			BitSet full = new BitSet(this.bits);
-			BitSet empty = new BitSet(this.bits);
-			full.flip(0, this.bits);
-			if(currentState.equals(empty)){
-				new_element = true;
-			}
-			if (currentState.equals(full) != true){
-				boolean carry = true;
-				for(int k = 0; k < this.bits; k++){
-					if(carry == true){
-						carry = filter.get((int)hash*this.bits +k);
-						if(k != this.bits - 1 || carry == false){
-							filter.flip((int)hash*this.bits + k);
-						}
-					}
-				}
-			}	
-			filter.set((int) hash);
-		}
-		if(new_element){
+			//increases number added by 1
 			elementsAdded++;
 		}
 	}
 	
 	boolean appears(String s){
+		//stores upper and lowercase value of S
 		String capS = s.toUpperCase();
 		String lowS = s.toLowerCase();
 		boolean check = true;
-		
+		//keeps track of all hash checks, if any are false, this returns false
 		for (int i = 0; i < numHash; i++){
-			boolean currentCheck = false;
-			long hash = 0;
-			long capSHash = MurmurHash.hash64(capS);
-			long lowSHash = MurmurHash.hash64(lowS);
-			hash = (capSHash + i * lowSHash) % this.maxSize;
-			if (hash < 0){
-				hash += this.maxSize;
-			}
-			
-			for (int k = 0; k < this.bits; k++){
-				if(filter.get((int)hash*this.bits + k)){
-					currentCheck = true;
-				}
-			}
-			if (currentCheck == false){
+			//creates hash by taking hash(UPPERCASE) + hash(LOWERCASE) * i % size of the bloom filter
+			//as explained here: http://willwhim.wpengine.com/2011/09/03/producing-n-hash-functions-by-hashing-only-once/
+			BigInteger hash;
+			BigInteger capSHash = BigInteger.valueOf(MurmurHash.hash64(capS));
+			BigInteger lowSHash = BigInteger.valueOf(MurmurHash.hash64(lowS));
+			hash = capSHash.add(lowSHash.multiply(BigInteger.valueOf(i)));
+			hash = hash.mod(BigInteger.valueOf(this.filterSize));
+			//if returns false, the value is not in the filter so we can break the for loop
+			if (filter.get(hash.intValue()) == false){
 				check = false;
 			}
 		}
@@ -94,5 +74,12 @@ public class BloomFilterMurmur {
 	
 	public int numHashes(){
 		return this.numHash;
+	}
+	
+	public int cardinality(){
+		return this.filter.cardinality();
+	}
+	public int length(){
+		return this.filter.length();
 	}
 }
